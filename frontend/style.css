@@ -1,0 +1,119 @@
+body{
+  font-family: Georgia;
+  font-size: 10px
+}
+
+.btn-group-xs > .btn, .btn-xs {
+  padding: .25rem .4rem;
+  font-size: .1rem;
+  line-height: .75;
+  border-radius: .2rem;
+}
+
+.axis line{
+  stroke: #706f6f;
+  stroke-width: 1;
+  shape-rendering: optimizeSpeed;
+}
+
+path {
+    stroke-linejoin: round;
+    stroke-miterlimit: 2;
+    stroke-linecap: round;
+}
+
+.axis text {
+  fill: #2b2929;
+  font-family: Georgia;
+  font-size: 80%;
+}
+
+text {
+  fill: #2b2929;
+  font-family: Georgia;
+  font-size: 80%;
+  font-weight: bold;
+}
+
+.line {
+  fill: none;
+  stroke-width: 0.6;
+  stroke: #0b0b0b;
+}
+
+.ghost-line {
+  fill:none;
+  stroke: darkgrey;
+    opacity: 0;
+stroke-width: 5;
+}
+
+.ghost-lineactive {
+  fill:none;
+  stroke: #0e5096;
+  opacity: 1;
+  stroke-width: 2;
+}
+	                 
+.serie_label {
+  fill: #0b0a0a;
+  opacity: 0.5;
+  font-family: Georgia;
+  font-size: 80%;
+}
+
+.serie_labelactive {
+  fill: #2b2929;
+  opacity: 1;
+  font-family: Georgia;
+  font-size: 80%;
+}
+
+.brush {
+  stroke: #ffc107;
+  stroke-opacity:0.5;
+}
+
+.focus  {
+  opacity:0.2;
+}
+
+.outline {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.card-body {
+  padding: 0.3rem;
+}
+
+.feature {
+  fill: #ccc;
+}
+
+.mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+  stroke-linejoin: round;
+}
+
+path {
+  stroke: #fff;
+  stroke-width: .5px;
+}
+.county-hover{
+  fill:#0e5096;
+}
+
+.county-hover-fixed{
+  fill:#0e5096;
+}
+
+.axis path {
+  stroke: #706f6f;
+  stroke-width: 0.7;
+  shape-rendering: optimizeSpeed;
+  fill: none;
+}
