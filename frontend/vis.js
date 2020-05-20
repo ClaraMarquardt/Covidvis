@@ -1,3 +1,4 @@
+
 // ----------------------------------------
 // ### INITIALIZATION 
 // ----------------------------------------
@@ -8,19 +9,37 @@
 /// * CANVAS
 
 /// Basic variables
-width     = 600;
-height    = 800;
-margin    = 10;
-padding   = 10;
+width     = 1500
+height    = 800
 
-/// Additional variables
-adj       = 10;
-adj_vis_w = 40;
 
 /// Graph-specific variables
-height_vis1 = height/2
-height_vis2 = height/2
-    
+height_top        = height/9
+height_middle     = height/12
+
+height_vis_main   = height/2
+width_vis_main    = width/2
+height_vis_mini   = height/4
+width_vis_mini    = width/4
+
+padding_top          = 0
+padding_top_main     = height_vis_main/6
+padding_bottom_main  = height_vis_main/18
+padding_hor_main     = 60
+padding_top_mini     = (height_vis_mini/6) - height_vis_mini*0.02
+padding_bottom_mini  = (height_vis_mini/18) + height_vis_mini*0.02
+padding_hor_mini     = 60
+
+/// Element-specific variables
+button_width_main    = width/14
+button_height_main   = height/25
+label_width_main     = button_width_main*2
+
+button_width_mini    = (width/14)/2
+button_height_mini   = (height/25)/2
+label_width_mini     = (button_width_main*2)/1.5
+
+legend_circle_radius = width_vis_main/75
 
 /// * HELPERS
 
@@ -32,22 +51,22 @@ step  = d3.scaleLinear()
           .domain([1, 8])
 
 color = d3.scaleLinear()
-          .range(['#d73027', '#f46d43', '#fdae61', '#fee08b', '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850'])
-          .interpolate(d3.interpolateHcl); 
+          .range(["#d73027", "#f46d43", "#fdae61", "#fee08b", "#d9ef8b", "#a6d96a", "#66bd63", "#1a9850"])
+          .interpolate(d3.interpolateHcl) 
 
 // Time format
-timeConv = d3.timeParse("%m/%-d/%y");
-timeForm = d3.timeFormat("%m/%-d/%y");
+timeConv = d3.timeParse("%m/%-d/%y")
+timeForm = d3.timeFormat("%m/%-d/%y")
 
 // Bisect
-bisect = d3.bisector(function(d) { return d.date; }).left;
+bisect = d3.bisector(function(d) { return d.date }).left
 
 // Axes
-xScale_main = d3.scaleTime().range([0,width - adj_vis_w ])
-yScale_main = d3.scaleLinear().rangeRound([height_vis2, 60])
+xScale_main = d3.scaleTime().range([0, width_vis_main - padding_hor_main*2 ])
+yScale_main = d3.scaleLinear().rangeRound([(height_vis_main-padding_bottom_main), padding_top_main])
 
-xScale_mini = d3.scaleTime().range([0,(width*2)/5 - adj_vis_w ])
-yScale_mini = d3.scaleLinear().rangeRound([height_vis2/3, 0])
+xScale_mini = d3.scaleTime().range([0,width_vis_mini - padding_hor_mini*2])
+yScale_mini = d3.scaleLinear().rangeRound([(height_vis_mini-padding_bottom_mini), padding_top_mini])
             
 
 /// * PARAMETERS
@@ -63,12 +82,12 @@ county_default           = "Suffolk"
 county_default_id        = 25025
 
 /// * MISC GLOBALS
-today_raw = new Date();
-dd        = String(today_raw.getDate())
-mm        = String(today_raw.getMonth() + 1).padStart(2, '0')
-today     = mm + '/' + dd + '/20'
-
 init_indicator = 0
+
+today_raw = new Date()
+dd        = String(today_raw.getDate())
+mm        = String(today_raw.getMonth() + 1).padStart(2, "0")
+today     = mm + "/" + dd + "/20"
 
 data_column_current           = "cummulative_predicted"
 county_data_crosswalk_current = ""
@@ -80,7 +99,7 @@ map_data_current              = ""
 // ### MAIN
 // ----------------------------------------
 
-// Make client-side API call to obtain the user's location
+// Make client-side API call to obtain the user"s location
 $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
 
     // Inspect the data 
@@ -95,20 +114,28 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
     // Make reverse geocoding request to obtain county
     rev_geocoding_request = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+latitude+","+longitude+"&result_type=administrative_area_level_2&key=AIzaSyAttZrqwRZ-38y-a4AFr8SfO2qiNlJusLc"
     $.getJSON(rev_geocoding_request, function (locationdata, status) {
-      
+
       // Obtain address
-      address  = locationdata.results[0].formatted_address
-      if (address.split(",").lenth==3) {
+      if (locationdata.status=="OK" && locationdata.results[0].formatted_address.split(",").length==3) {
+        
+        address  = locationdata.results[0].formatted_address
+        
         county   = address.split(",")[0].split(" ")[0].trim()
         state    = address.split(",")[1].trim()
         country  = address.split(",")[2].trim()
+        
       } else {
+
+        address  = "Longitude: " + longitude + " / Latitude: " + latitude
         county   = ""
         state    = ""
         country  = ""
+
       }  
+   
 
       // Inspect the data 
+      console.log(address)
       console.log(county)
       console.log(state)
       console.log(country)
@@ -124,7 +151,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           
             /// Group data
             raw_data_group = d3.nest() 
-                             .key(function(d) {return d.state;})
+                             .key(function(d) {return d.state})
                              .entries(raw_data)       
           
             /// Return data
@@ -205,19 +232,19 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
             /// Format data
             raw_data.forEach(function(d) {
                 d.county                = d.county
-                d.state                 = d.state;
-                d.county_id             = +d.county_id;
+                d.state                 = d.state
+                d.county_id             = +d.county_id
                 d.r_t                   = +d.r_t
                 d.date                  = timeConv(d.date)
-                d.cummulative_deaths    = +d.cummulative_deaths;
+                d.cummulative_deaths    = +d.cummulative_deaths
                 d.cummulative_predicted = d.cummulative_predicted*0.04
           
             })
           
             /// Group data
             raw_data_group = d3.nest() 
-                             .key(function(d) {return d.county;})
-                             .entries(raw_data);
+                             .key(function(d) {return d.county})
+                             .entries(raw_data)
           
             /// Return data
             return(raw_data_group)
@@ -261,32 +288,37 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
             minDate = d3.min(county_data, function(d) {
                 return d3.min(d.values, function (f) {
                     return f.date
-                });
-            });
+                })
+            })
             maxDate = d3.max(county_data, function(d) {
                 return d3.max(d.values, function (f) {
                     return f.date
-                });
-            });
+                })
+            })
             
             /// yscale
             minValue = d3.min(county_data, function(d) {
                 return d3.min(d.values, function (f) {
                     return f[data_column]
-                });
-            });
-            maxValue = d3.max(county_data, function(d) {
+                })
+            })
+            maxValue_main = d3.max([county_data[county_data.length-1]], function(d) {
                 return d3.max(d.values, function (f) {
                     return f[data_column]
-                });
-            });
-          
+                })
+            })
+            maxValue_mini = d3.max(county_data.slice(0,-1), function(d) {
+                return d3.max(d.values, function (f) {
+                    return f[data_column]
+                })
+            })         
             return {
                   minDate: minDate,
                   maxDate: maxDate,
                   minValue: minValue,
-                  maxValue: maxValue*1.4
-              };
+                  maxValue_main: maxValue_main*1.4,
+                  maxValue_mini: maxValue_mini*1.4,
+              }
           }
           
           /// DrawTop
@@ -295,36 +327,39 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
              
             svg_top.append("g")
                    .append("text")
+                   .attr("transform", "translate(" + (width/2) + "," + (height_top/3) +")")
                    .text("Model Projections")
-                   .attr("transform", "translate(" + ( width+50)+ ","+(20)+")")
                    .style("font-size", "20px")
-            
+                   .style("text-anchor", "middle")
+                   .style("dominant-baseline", "central")
 
             states(county_data_crosswalk_current).forEach(function(d,i) {
 
-              svg_top.append('g')
-                    .attr("transform", "translate(" + ( 350+i*150)+ ",50)")
-                    .append('foreignObject')
-                    .attr('width','200')
-                    .attr('height','70')
-                    .append('xhtml:div')
+              svg_top.append("g")
+                    .attr("transform", "translate(" + ((width-(button_width_main*states(county_data_crosswalk_current).length))/2 + i*button_width_main)+ "," + ((height_top/3)*2) +")")
+                    .append("foreignObject")
+                    .attr("width",button_width_main)
+                    .attr("height",button_height_main)
+                    .append("xhtml:div")
+                    .attr("class","text-center")
                     .on("click", function() {
                       $(".statebutton").removeClass("active")
-                      $(".statebutton").removeAttr('data-toggle', null)
-                      d3.select(this).attr('data-toggle','button')
+                      $(".statebutton").removeAttr("data-toggle", null)
+                      d3.select(this).attr("data-toggle","button")
                       $(this).addClass("active")
                       UpdateData(state = d)
-                      })
-                    .append("g").append('xhtml:button')
-                    .attr('class','btn btn-outline-dark btn-xs statebutton')
-                    .attr('id','button_'+(i))
-                    .html("&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"+d+"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp")
+                    })
+                    .append("g")
+                    .append("xhtml:button")
+                    .attr("id","button_"+(i))
+                    .attr("class","btn btn-outline-dark btn-xs statebutton")
+                    .html(d)
 
             })
 
 
             // Highlight button
-            d3.select("#button_"+state_choice_rank).attr('data-toggle','button')
+            d3.select("#button_"+state_choice_rank).attr("data-toggle","button")
             $("#button_"+state_choice_rank).addClass("active")
             $("#button_"+state_choice_rank).attr("aria-pressed",true)
 
@@ -338,54 +373,57 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           
             // Intialize map objects
             states_data = topojson.feature(map_data, map_data.objects.states),
-            state       = states_data.features.filter(function(d) { return d.id === state_choice_id; })[0];
+            state       = states_data.features.filter(function(d) { return d.id === state_choice_id })[0]
            
             projection = d3.geoAlbers()
             projection.scale(1).translate([0, 0])
             path       = d3.geoPath().projection(projection)
           
             b = path.bounds(state)
-            s = .95 / Math.max((b[1][0] - b[0][0]) / (width-20), (b[1][1] - b[0][1]) / (height_vis1*0.75))
-            t = [(width - s * (b[1][0] + b[0][0])) / 2, (height_vis1 - s * (b[1][1] + b[0][1])) / 2];
+            s = .95 / Math.max((b[1][0] - b[0][0]) / (width_vis_main-20), (b[1][1] - b[0][1]) / (height_vis_main*0.8))
+            t = [(width_vis_main - s * (b[1][0] + b[0][0])) / 2, (height_vis_main - s * (b[1][1] + b[0][1])) / 2]
            
             projection.scale(s).translate(t)
           
             // Generate header
             svg_map.append("g")
-                  .append("text")
-                  .text("Current infection rate (R t)")
-                  .attr("transform", "translate(" + ( width/2-100)+ ","+(15)+")").style("font-size", "15px")
-          
+                   .append("text")
+                   .attr("transform", "translate(" + (width_vis_main/2)+ ","+(padding_top_main/2)+")")
+                   .text("Current infection rates (R t) by county")
+                   .style("font-size", "15px")
+                   .style("text-anchor", "middle")
+                   .style("dominant-baseline", "central")
+    
             // Generate canvas objects
             svg_map.append("path")
-                   .datum(topojson.mesh(map_data, map_data.objects.states, function(a, b) { return a !== b; }))
+                   .datum(topojson.mesh(map_data, map_data.objects.states, function(a, b) { return a !== b }))
                    .attr("class", "mesh")
-                   .attr("d", path);
+                   .attr("d", path)
           
             svg_map.append("path")
                    .datum(state)
                    .attr("class", "outline")
                    .attr("d", path)
-                   .attr('id', 'land');
+                   .attr("id", "land")
           
             svg_map.append("clipPath")
                    .attr("id", "clip-land")
                    .append("use")
-                   .attr("xlink:href", "#land");
+                   .attr("xlink:href", "#land")
           
             svg_map.selectAll("path")
                     .data(topojson.feature(map_data, map_data.objects.counties).features)
                     .enter()
                     .append("path")
                     .attr("d", path)
-                    .attr('class', function(d) {
+                    .attr("class", function(d) {
                       if(d.id==county_choice_id) {
                         return("county county-hover")
                       } else {
                         return("county")
                       }
                     })
-                    .attr('county-name', function(d) {
+                    .attr("county-name", function(d) {
                       county_name = "undefined"
                       county_data.forEach(function(e) {
                         if(e.values[0].county_id==d.id) {
@@ -394,7 +432,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                       })
                       return(county_name)
                     })
-                    .attr('county-id', function(d) {
+                    .attr("county-id", function(d) {
                       return d.id
                     })
                     .attr("clip-path", "url(#clip-land)")
@@ -415,10 +453,10 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                             }
                           })
                           d3.selectAll(".serie_label").attr("class", function(f) {
-                            if (f.id==e.values[0].county) {
-                              return("serie_labelactive serie_label")
+                            if (f.key==e.values[0].county) {
+                              return("card-body serie_labelactive serie_label")
                             } else {
-                              return("serie_label")
+                              return("card-body serie_label")
           
                             }
                           })
@@ -444,10 +482,10 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                             }
                           })
                           d3.selectAll(".serie_label").attr("class", function(f) {
-                            if (f.id==e.values[0].county) {
-                              return("serie_labelactive serie_label")
+                            if (f.key==e.values[0].county) {
+                              return("card-body serie_labelactive serie_label")
                             } else {
-                              return("serie_label")
+                              return("card-body serie_label")
           
                             }
                           })
@@ -486,24 +524,35 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           
             // Generate legend
             circle1 = svg_map.append("g")
-            circle1.append("circle").attr("fill", color(color_min))
-                   .attr("r", 10)
-                   .attr("cx", function (d) { return width/2-50; })
-                   .attr("cy", function (d) { return height-410; })
+            circle1.append("circle")
+                   .attr("r", legend_circle_radius)
+                   .attr("cx", function (d) { return width_vis_main/2-legend_circle_radius*4 })
+                   .attr("cy", function (d) { return height_vis_main-legend_circle_radius*3 })
+                   .attr("fill", color(color_min))
             circle1.append("text")
+                   .attr("transform", "translate(" + ( width_vis_main/2-legend_circle_radius*4)+ 
+                    ","+(height_vis_main-legend_circle_radius)+")")
                    .text(color_min.toFixed(2))
-                   .attr("transform", "translate(" + ( width/2-30)+ ","+(height-410)+")")
+                   .style("text-anchor", "middle")
+                   .style("dominant-baseline", "central")
+                   .style("font-size", "10px")
+
             
             circle2 = svg_map.append("g")
             circle2.append("circle")
+                   .attr("r", legend_circle_radius)
+                   .attr("cx", function (d) { return width_vis_main/2+legend_circle_radius*4 })
+                   .attr("cy", function (d) { return height_vis_main-legend_circle_radius*3 })
                    .attr("fill", color(color_max))
-                   .attr("r", 10)
-                   .attr("cx", function (d) { return width/2+50; })
-                   .attr("cy", function (d) { return height-410; })
-          
+
             circle2.append("text")
+                   .attr("transform", "translate(" + ( width_vis_main/2+legend_circle_radius*4)+ 
+                    ","+(height_vis_main-legend_circle_radius)+")")
                    .text(color_max.toFixed(2))
-                   .attr("transform", "translate(" + ( width/2+70)+ ","+(height-410)+")")
+                   .style("text-anchor", "middle")
+                   .style("dominant-baseline", "central")
+                   .style("font-size", "10px")
+
           
           }
            
@@ -511,86 +560,151 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           // ----------------------------------------
           function DrawGraphHelper(county_data, data_column, svg_id) {
           
-            // Generate header
-            d3.selectAll("#svg_graph_"+(svg_id+1))
-              .append("g")
-              .append("text")
-              .text("Predicted confirmed cases")
-              .attr("transform", "translate(" + ( width/2-80)+ ","+(15)+")")
-              .style("font-size", "15px")
-          
-            // Generate buttons
-             container2 = d3.selectAll("#svg_graph_"+(svg_id+1))
-                           .append('g')
-                           .attr("transform", "translate(" + ( 70)+ ",65)")
-                           .append('foreignObject')
-                           .attr('width','200')
-                           .attr('height','70')
-                           .append('xhtml:div')
-                           .on("click", function() {
-                              d3.select("#button2")
-                                .attr('data-toggle','button')
-                              $("#button1").removeAttr('data-toggle', null)
-                              $(".btn").removeClass("active")
-                              $(this).addClass("active")
-                              UpdateVisualization(data_column="cummulative_predicted", relax_date=relax_date_current)
-                           })
-                            .append("g").append('xhtml:button')
-                            .attr('class','btn btn-outline-dark btn-xs')
-                            .attr('id','button2')
-                            .html('&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspCumulative cases&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp')
+            if (svg_id==-1) {
               
-            container1 = d3.selectAll("#svg_graph_"+(svg_id+1))
-                           .append('g')
-                           .attr("transform", "translate(" + ( 70)+ ",90)")
-                           .append('foreignObject')
-                           .attr('width','200')
-                           .attr('height','70')
-                           .append('xhtml:div')
-                           .on("click", function() {
-                             d3.select("#button1").attr('data-toggle','button')
-                             $("#button2").removeAttr('data-toggle', null)
-                             $(".btn").removeClass("active");
-                             $(this).addClass("active")
-                             UpdateVisualization(data_column="cummulative_deaths", relax_date=relax_date_current)
-                           })
-                           .append("g").append('xhtml:button')
-                           .attr('class','btn btn-outline-dark btn-xs')
-                           .attr('id','button1')
-                           .html('&nbsp&nbspDaily cases&nbsp&nbsp')  
-          
-            // Set default buttons    
-            d3.select("#button2").attr('data-toggle','button')
-            $("#button2").addClass("active")
-            $("#button2").attr("aria-pressed",true)
-          
-            // Generate statistics box
-            container3 = d3.selectAll("#svg_graph_"+(svg_id+1))
-                           .append('g')
-                           .attr("transform", "translate(" + ( width/2-50)+ ",65)")
-                           .append('foreignObject')
-                           .attr('width','200')
-                           .attr('height','70')
-                           .append('xhtml:div')
-                           .append("g")
-                           .attr("class", "card  text-center border-dark mb-3")
-          
-            container3.append("g")
-                      .append('xhtml:div')
-                      .attr("class", "card-body")
-                      .attr('width','200')
-                      .attr('height','55')
-                      .html("   <br> <br>  ")
-                      .attr("id", "div_stat")
-          
-            // Initialize statistics box
-            i            = bisect(county_data[county_data.length-1].values, timeConv(today), 1)
-            deathtotal   = county_data[county_data.length-1].values[i][data_column_current]
+              // Generate header
+              d3.selectAll("#svg_graph_"+(svg_id+1))
+                .append("g")
+                .append("text")
+                .attr("transform", "translate(" + (width_vis_main/2)+ ","+(padding_top_main/2)+")")
+                .text("State-wide number of predicted confirmed cases")
+                .style("font-size", "15px")
+                .style("text-anchor", "middle")
+                .style("dominant-baseline", "central")
+
+              // Generate buttons
+              container1 = d3.selectAll("#svg_graph_"+(svg_id+1))
+                             .append("g")
+                             .attr("transform", "translate(" + (padding_hor_main*1.1)+ ","+(padding_top_main+button_height_main)+")")
+                             .append("foreignObject")
+                             .attr("width",button_width_main)
+                             .attr("height",button_height_main)
+                             .append("xhtml:div")
+                             .on("click", function() {
+                               d3.select("#selector_1").attr("data-toggle","button")
+                               $("#selector_2").removeAttr("data-toggle", null)
+                               $(".btn_selector").removeClass("active")
+                               $(this).addClass("active")
+                               UpdateVisualization(data_column="cummulative_deaths", relax_date=relax_date_current)
+                             })
+                             .append("g")
+                             .append("xhtml:button")
+                             .attr("class","btn btn-outline-dark btn-xs btn-block btn_selector")
+                             .attr("id","selector_1")
+                             .html("Daily")  
+
+            container2 = d3.selectAll("#svg_graph_"+(svg_id+1))
+                             .append("g")
+                             .attr("transform", "translate(" + (padding_hor_main*1.1)+ ","+padding_top_main+")")
+                             .append("foreignObject")
+                             .attr("width",button_width_main)
+                             .attr("height",button_height_main)
+                             .append("xhtml:div")
+                             .on("click", function() {
+                                d3.select("#selector_2").attr("data-toggle","button")
+                                $("#selector_1").removeAttr("data-toggle", null)
+                                $(".btn_selector").removeClass("active")
+                                $(this).addClass("active")
+                                UpdateVisualization(data_column="cummulative_predicted", relax_date=relax_date_current)
+                             })
+                              .append("g")
+                              .append("xhtml:button")
+                              .attr("id","selector_2")
+                              .attr("class","btn btn-outline-dark btn-xs btn-block btn_selector")
+                              .html("Cumulative")
+
+
+              
+              // Set default buttons    
+              d3.select("#selector_2").attr("data-toggle","button")
+              $("#selector_2").addClass("active")
+              $("#selector_2").attr("aria-pressed",true)
+              
+              // Generate statistics box
+              container3 = d3.selectAll("#svg_graph_"+(svg_id+1))
+                             .append("g")
+                             .attr("transform", "translate(" + (width_vis_main/2-((label_width_main)/2))+ ","+padding_top_main+")")
+                             .append("foreignObject")
+                             .attr("width",label_width_main)
+                             .attr("height",button_height_main)
+                             .append("xhtml:div")
+                             .attr("width",label_width_main)
+                             .attr("height",button_height_main)
+                             .attr("class", "card_xs card text-center border-dark mb-3 card-block")
+                             .style("position","static")
+                             .attr("width",label_width_main)
+                             .attr("transform", "translate(" + (width_vis_main/2-((label_width_main)/2))+ ","+padding_top_main+")")
+                             .append("g")
+                             .attr("class", "card-body")
+                             .attr("id", "div_stat_"+(svg_id+1))
+                             .html("")
+                         
+              // Initialize statistics box
+              index            = bisect(county_data[county_data.length-1].values, timeConv(today), 1)
             
-            if (d3.select("#button1").attr('data-toggle')=='button') {
-              d3.selectAll("#div_stat").html(Math.round(deathtotal) + " cumulative cases as of " +timeForm(timeConv(today)))
+              if (d3.select("#selector_2").attr("data-toggle")=="button") {
+                d3.selectAll("#div_stat_"+(svg_id+1)).html(Math.round(county_data[county_data.length-1].values[index][data_column_current]) + " cumulative cases as of " +timeForm(timeConv(today)))
+              } else {
+                d3.selectAll("#div_stat_"+(svg_id+1)).html(Math.round(county_data[county_data.length-1].values[index][data_column_current]) + " daily cases on " +timeForm(timeConv(today)))
+              }              
+
             } else {
-              d3.selectAll("#div_stat").html("&nbsp&nbsp&nbsp" +Math.round(deathtotal) + " daily cases on " +timeForm(timeConv(today)))
+
+              // Generate header
+              container4 = d3.selectAll("#svg_graph_"+(svg_id+1))
+                             .append("g")
+                             .attr("transform", "translate(" + (width_vis_mini/2-((label_width_mini)/2))+ ","+0+")")
+                             .append("foreignObject")
+                             .attr("width",label_width_mini)
+                             .attr("height",button_height_mini)
+                             .append("xhtml:div")
+                             .attr("width",label_width_mini)
+                             .attr("height",button_height_mini)
+                             .attr("class", "card_xs card text-center border-dark mb-3 card-block")
+                             .style("position","static")
+                             .attr("width",label_width_mini)
+                             .attr("transform", "translate(" + (width_vis_mini/2-((label_width_mini)/2))+ ","+0+")")
+                             .append("g")
+                             .attr("class", function(d) {
+                                if (d.key==county_default) {
+                                  return("card-body serie_labelactive serie_label")
+                                } else {
+                                  return("card-body serie_label")
+                              }
+                             })
+                             .attr("id", "div_name_"+(svg_id+1))
+                             .style("line-height",0.4)
+                             .html(county_data[svg_id].key)
+
+              container5 = d3.selectAll("#svg_graph_"+(svg_id+1))
+                             .append("g")
+                             .attr("transform", "translate(" + (width_vis_mini/2-((label_width_mini)/2))+ ","+button_height_mini*1.1+")")
+                             .append("foreignObject")
+                             .attr("width",label_width_mini)
+                             .attr("height",button_height_mini)
+                             .append("xhtml:div")
+                             .attr("width",label_width_mini)
+                             .attr("height",button_height_mini)
+                             .attr("class", "card_xs card text-center  mb-3 card-block")
+                             .style("position","static")
+                             .attr("width",label_width_mini)
+                             .attr("transform", "translate(" + (width_vis_mini/2-((label_width_mini)/2))+ ","+button_height_mini*1.1+")")
+                             .append("g")
+                             .attr("class", "card-body")
+                             .attr("id", "div_stat_"+(svg_id+1))
+                             .style("line-height",0.4)
+                             .html(county_data[svg_id].key)
+              
+              // Initialize statistics box
+              index            = bisect(county_data[county_data.length-1].values, timeConv(today), 1)
+            
+              if (d3.select("#selector_2").attr("data-toggle")=="button") {
+                d3.selectAll("#div_stat_"+(svg_id+1)).html(Math.round(county_data[svg_id].values[index][data_column_current]) + " cumulative cases")
+              } else {
+                d3.selectAll("#div_stat_"+(svg_id+1)).html(Math.round(county_data[svg_id].values[index][data_column_current]) + " daily cases")
+              }
+
+      
             }
 
           }
@@ -612,12 +726,12 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
               DrawGraphHelper(county_data, data_column, svg_id)
           
               // Misc var
-              height_focus_temp = 160
-              height_temp       = height_vis2
+              height_focus_temp = padding_top_main*2.25
+              height_temp       = height_vis_main
 
               // Scales
               xScale_main.domain([graphsetup.minDate,graphsetup.maxDate])
-              yScale_main.domain([graphsetup.minValue,graphsetup.maxValue])
+              yScale_main.domain([graphsetup.minValue,graphsetup.maxValue_main])
               
               xScale_temp = xScale_main
               yScale_temp = yScale_main
@@ -625,7 +739,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
               // Axes
               xaxis = d3.axisBottom()
                         .ticks(d3.timeDay.every(60))
-                        .tickFormat(d3.timeFormat('%b %d'))
+                        .tickFormat(d3.timeFormat("%b %d"))
                         .scale(xScale_main)
               
               yaxis = d3.axisLeft()
@@ -634,24 +748,31 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
               // Brush label
               brush_label = d3.selectAll("#svg_graph_"+(svg_id+1))
                               .append("g")
-                              .append('text')
-                              .attr('id', 'brush_label_'+svg_id)
+                              .append("text")
+                              .attr("id", "brush_label_"+svg_id)
                               .style("font-weight","normal")
-                              .style("font-size","90%")
-                              .attr("transform", 'rotate(270)')
-                              .attr('x', -230)
-                              .attr('y', (xScale_temp(timeConv(relax_date_default)) + adj_vis_w -(xScale_temp(timeConv(relax_date_default_plus)) - xScale_temp(timeConv(relax_date_default_minus)))))
+                              .style("font-size","10px")
+                              .attr("transform", "rotate(270)")
+                              .attr("x", -1*(height_focus_temp*1.05))
+                              .attr("y", (xScale_temp(timeConv(relax_date_default)))+
+                                padding_hor_main-1*(xScale_temp(timeConv(relax_date_default_plus))-
+                                xScale_temp(timeConv(relax_date_default_minus))))
                               .text("Relax start date")
+                              .style("text-anchor", "end")
+
 
             } else {
 
+              // Draw Helpers
+              DrawGraphHelper(county_data, data_column, svg_id)
+          
               // Misc var
-              height_focus_temp = 160/3
-              height_temp       = height_vis2/3
+              height_focus_temp = padding_top_mini*2.25
+              height_temp       = height_vis_mini
 
               // Scales
               xScale_mini.domain([graphsetup.minDate,graphsetup.maxDate])
-              yScale_mini.domain([graphsetup.minValue,graphsetup.maxValue])
+              yScale_mini.domain([graphsetup.minValue,graphsetup.maxValue_mini])
 
               xScale_temp = xScale_mini
               yScale_temp = yScale_mini
@@ -659,7 +780,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
               // Axes
               xaxis = d3.axisBottom()
                         .ticks(d3.timeDay.every(60))
-                        .tickFormat(d3.timeFormat('%b %d'))
+                        .tickFormat(d3.timeFormat("%b %d"))
                         .scale(xScale_mini)
               
               yaxis = d3.axisLeft()
@@ -673,39 +794,55 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
   
             // Initialize lines   
             line = d3.line()
-                     .x(function(d) { return xScale_temp(d.date); })
-                     .y(function(d) { return yScale_temp(d[data_column]);});
+                     .x(function(d) { return xScale_temp(d.date) })
+                     .y(function(d) { return yScale_temp(d[data_column])})
           
           
             // Draw axes    
             d3.selectAll("#svg_graph_"+(svg_id+1))
               .append("g")
               .attr("class", "x axis")
-              .attr("transform", "translate(" + adj_vis_w + "," + height_temp + ")")
-              .call(xaxis);
+              .attr("transform", function() {
+                  if (svg_id==-1) {
+                    return("translate(" + padding_hor_main + "," + (height_temp-padding_bottom_main) + ")")
+                  } else {
+                    return("translate(" + padding_hor_mini + "," + (height_temp-padding_bottom_mini) + ")")
+                  }
+                })
+              .call(xaxis)
                 
             d3.selectAll("#svg_graph_"+(svg_id+1))
               .append("g")
               .attr("class", "y axis")
-              .attr("transform", "translate(" + adj_vis_w + ",0)")
-              .call(yaxis)
-              .append("text")
               .attr("transform", function() {
-                if (svg_id==-1) {
-                  return("translate(" + 0 + ",60) rotate(-90)")
-                } else {
-                  return("translate(" + 0 + ",0) rotate(-90)")
-                }
+                  if (svg_id==-1) {
+                    return("translate(" + padding_hor_main + ",0)")
+                  } else {
+                    return("translate(" + padding_hor_mini + ",0)")
+                  }
               })
-              .attr("dy", ".75em")
-              .attr("y", 6)
-              .style("text-anchor", "end")
-              .text("Cases")
-            
+              .call(yaxis)
+
+            if (svg_id==-1) {
+              d3.selectAll(".y")
+                .append("text")
+                .attr("transform", "translate(" + -1*padding_hor_main + ","+(padding_top_main+0.5*(yScale_main.range()[0]-yScale_main.range()[1]))+") rotate(-90)")
+                .text("Cases")
+                .style("font-size","10px")
+                .style("text-anchor", "end")
+                .style("dominant-baseline", "hanging")
+            }
+
             // Draw main objects - layer: svg_graph_layer_1
             svg_graph_layer_1 =  d3.selectAll("#svg_graph_"+(svg_id+1))
                                    .append("g")
-                                   .attr("transform", "translate(" + adj_vis_w + ",0)")
+                                   .attr("transform", function() {
+                                    if (svg_id==-1) {
+                                        return("translate(" + padding_hor_main + ",0)")
+                                      } else {
+                                        return("translate(" + padding_hor_mini + ",0)")
+                                      }
+                                  })
           
             lines = svg_graph_layer_1.selectAll("lines")
                                      .data(function() {
@@ -721,33 +858,9 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                  
             lines.append("path")
                  .attr("class", "line")
-                 .attr("d", function(d) { return line(d.values); });
-                
-            lines.append("text")
-                  .attr("class", function(d) {
-                    if (d.key==county_default) {
-                      return("serie_labelactive serie_label")
-                    } else {
-                      return("serie_label")
-                    }
-                  })
-                  .attr("x", 5)
-                  .datum(function(d) {
-                    return {
-                        id: d.key,
-                        maxDate: d3.max(d.values, function(f) {
-                          return f.date
-                        }),
-                        maxValue: d3.max(d.values, function(f) {
-                          return f[data_column]
-                        })
-                    }; 
-                  })
-                  .attr("transform", function(d) {
-                    return "translate(" + (xScale_temp(d.maxDate) + 10) + "," + (yScale_temp(d.maxValue) + 5 )+ ")"; 
-                  })
-                  .text(function(d) { return d.id; }); 
-                 
+                 .attr("d", function(d) { return line(d.values) })
+            
+
             ghost_lines = lines.append("path")
                                 .attr("class", function(d) {
                                   if (d.key==county_default) {
@@ -756,16 +869,22 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                                     return("ghost-line")
                                   }
                                 })
-                               .attr("d", function(d) { return line(d.values); }); 
+                               .attr("d", function(d) { return line(d.values) }) 
           
             // Draw main objects - layer: svg_graph_layer_2
             svg_graph_layer_2 =  d3.selectAll("#svg_graph_"+(svg_id+1))
                                     .append("g")
-                                    .attr("transform", "translate(" + adj_vis_w + ",0)")
+                                    .attr("transform", function() {
+                                    if (svg_id==-1) {
+                                        return("translate(" + padding_hor_main + ","+-1*padding_bottom_main+")")
+                                      } else {
+                                        return("translate(" + padding_hor_mini + ","+-1*padding_bottom_mini+")")
+                                      }
+                                    })
 
 
-            focus = svg_graph_layer_2.append('g')
-                                     .append('line')
+            focus = svg_graph_layer_2.append("g")
+                                     .append("line")
                                      .attr("class", function() {
                                         if(svg_id==-1) {
                                           return("focus focus_main")
@@ -793,32 +912,50 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                              .attr("id","leftrect_"+svg_id)
                              .attr("height", height_temp-height_focus_temp)
                              .attr("transform", "translate(" +  0+ ","+height_focus_temp+")")
-                             .attr('width', xScale_temp.range()[1])
+                             .attr("width", xScale_temp.range()[1])
                              .on("mousemove", function () {
 
                                 if (svg_id==-1) {
-                                  x0           = xScale_main.invert(d3.mouse(this)[0]);
-                                  i            = bisect(county_data[county_data.length-1].values, x0, 1);
-                                  selectedData = county_data[county_data.length-1].values[i]
-                                  deathtotal   = county_data[county_data.length-1].values[i][data_column]
+                                  x0           = xScale_main.invert(d3.mouse(this)[0])
+                                  index        = bisect(county_data[county_data.length-1].values, x0, 1)
+                                  selectedData = county_data[county_data.length-1].values[index]
+                                  deathtotal   = county_data[county_data.length-1].values[index][data_column]
                 
-                                  if ( d3.select("#button1").attr('data-toggle')=='button') {
-                                    d3.selectAll("#div_stat").html(Math.round(deathtotal) + " cumulative cases as of " + timeForm(xScale_main.invert(d3.mouse(this)[0])))
+                                  if ( d3.select("#selector_2").attr("data-toggle")=="button") {
+                                    d3.selectAll("#div_stat_0").html(Math.round(deathtotal) + " cumulative cases as of " + timeForm(xScale_main.invert(d3.mouse(this)[0])))                             
                                   } else {
-                                   d3.selectAll("#div_stat").html("" + Math.round(deathtotal) + " daily cases on " + timeForm(xScale_main.invert(d3.mouse(this)[0])))
+                                   d3.selectAll("#div_stat_0").html(Math.round(deathtotal) + " daily cases on " + timeForm(xScale_main.invert(d3.mouse(this)[0])))
                                   }
+
+                                  county_data.slice(0,-1).forEach(function(d,i) {
+                                    if (d3.select("#selector_2").attr("data-toggle")=="button") {
+                                      d3.selectAll("#div_stat_"+(i+1)).html(Math.round(county_data[i].values[index][data_column_current]) + " cumulative cases")
+                                    } else {
+                                      d3.selectAll("#div_stat_"+(i+1)).html(Math.round(county_data[i].values[index][data_column_current]) + " daily cases")
+                                    }
+                                  })
+
+
                                 } else {
-                                  x0           = xScale_mini.invert(d3.mouse(this)[0]);
-                                  i            = bisect(county_data[county_data.length-1].values, x0, 1);
-                                  selectedData = county_data[county_data.length-1].values[i]
-                                  deathtotal   = county_data[county_data.length-1].values[i][data_column]
+                                  x0           = xScale_mini.invert(d3.mouse(this)[0])
+                                  index        = bisect(county_data[county_data.length-1].values, x0, 1)
+                                  selectedData = county_data[county_data.length-1].values[index]
+                                  deathtotal   = county_data[county_data.length-1].values[index][data_column]
                 
-                                  if ( d3.select("#button1").attr('data-toggle')=='button') {
-                                    d3.selectAll("#div_stat").html(Math.round(deathtotal) + " cumulative cases as of " + timeForm(xScale_mini.invert(d3.mouse(this)[0])))
+                                  if ( d3.select("#selector_2").attr("data-toggle")=="button") {
+                                    d3.selectAll("#div_stat_0").html(Math.round(deathtotal) + " cumulative cases as of " + timeForm(xScale_mini.invert(d3.mouse(this)[0])))
                                   } else {
-                                   d3.selectAll("#div_stat").html("" + Math.round(deathtotal) + " daily cases on " + timeForm(xScale_mini.invert(d3.mouse(this)[0])))
+                                   d3.selectAll("#div_stat_0").html(Math.round(deathtotal) + " daily cases on " + timeForm(xScale_mini.invert(d3.mouse(this)[0])))
                                   }
                                 }
+
+                                county_data.slice(0,-1).forEach(function(d,i) {
+                                    if (d3.select("#selector_2").attr("data-toggle")=="button") {
+                                      d3.selectAll("#div_stat_"+(i+1)).html(Math.round(county_data[i].values[index][data_column_current]) + " cumulative cases")
+                                    } else {
+                                      d3.selectAll("#div_stat_"+(i+1)).html(Math.round(county_data[i].values[index][data_column_current]) + " daily cases")
+                                    }
+                                })
                   
                                 d3.selectAll(".focus_main")
                                    .attr("x1", xScale_main(selectedData.date))
@@ -830,8 +967,8 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
 
                             })
               
-            brush = svg_graph_layer_2.append('g')
-                                     .append('line')
+            brush = svg_graph_layer_2.append("g")
+                                     .append("line")
                                      .attr("class", function() {
                                        if(svg_id==-1) {
                                           return("brush brush_main")
@@ -846,7 +983,6 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                                       .attr("y2", height_temp)
                                       .attr("x1", xScale_temp(timeConv(relax_date_default)))
                                       .attr("x2", xScale_temp(timeConv(relax_date_default)))
-                                      .on("mouseup", function() {console.log("done")})
   
             if (svg_id==-1) {
               dragHandler_main(d3.selectAll("#brush_"+svg_id))
@@ -862,32 +998,38 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
              
             svg_middle.append("g")
                       .append("text")
-              .text("Predicted confirmed cases by county")
-              .attr("transform", "translate(" + ( width)+ ","+(20)+")")
-              .style("font-size", "15px")
+                      .attr("transform", "translate(" + (width/2)+ ","+(height_middle/3)+")")
+                      .text("Predicted confirmed cases by county")
+                      .style("font-size", "15px")
+                      .style("text-anchor", "middle")
+                      .style("dominant-baseline", "central")
 
           }
-      
-          
+    
+        
           /// DrawBottom
           // ----------------------------------------
           function DrawBottom() {
              
             svg_bottom.append("g")
                       .append("text")
+                      .attr("transform", "translate(" + (width/2)+ ","+((height_middle/3)*2)+")")
                       .text("Results are up-to-date as of " + timeForm(timeConv(today)))
-                      .attr("transform", "translate(" + (width+50)+ ","+(15)+")")
-                      .style("font-size", "13px")
+                      .style("font-size", "10px")
                       .style("font-style","italic")
                       .style("font-weight",100)
+                      .style("text-anchor", "middle")
+                      .style("dominant-baseline", "central")
 
             svg_bottom.append("g")
-                   .append("text").text("(We identified your location as: " + address + ")")
-                    .attr("transform", "translate(" + (width)+ ","+(30)+")")
-                   .style("font-size", "13px")
-                   .style("font-style","italic")
-                   .style("font-weight",100)
-
+                      .append("text")
+                      .attr("transform", "translate(" + (width/2)+ ","+((height_middle/3)*3)+")")
+                      .text("(Your location: " + address + ")")
+                      .style("font-size", "10px")
+                      .style("font-style","italic")
+                      .style("font-weight",100)
+                      .style("text-anchor", "middle")
+                      .style("dominant-baseline", "central")
           }
           
           /// Brush functions
@@ -914,17 +1056,28 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
 
               // Update position of label
                d3.select("#brush_label_-1")
-                  .attr('y', (xScale_main(x0_temp)-(xScale_main(timeConv(relax_date_default_plus)) - xScale_main(timeConv(relax_date_default_minus))))+adj_vis_w)
+                  .attr("y", (xScale_main(x0_temp)-1*(xScale_main(timeConv(relax_date_default_plus)) 
+                    - xScale_main(timeConv(relax_date_default_minus))))+padding_hor_main)
 
               // Update metrics
-               i            = bisect(county_data[county_data.length-1].values, x0_temp, 1);
-               selectedData = county_data[county_data.length-1].values[i]
-               deathtotal   = county_data[county_data.length-1].values[i][data_column_current]
-               if ( d3.select("#button1").attr('data-toggle')=='button') {
-                 d3.selectAll("#div_stat").html(Math.round(deathtotal) + " cumulative cases as of " + timeForm(x0_temp))
+               index        = bisect(county_data[county_data.length-1].values, x0_temp, 1)
+               selectedData = county_data[county_data.length-1].values[index]
+               deathtotal   = county_data[county_data.length-1].values[index][data_column_current]
+              
+               if ( d3.select("#selector_2").attr("data-toggle")=="button") {
+                 d3.selectAll("#div_stat_0").html(Math.round(deathtotal) + " cumulative cases as of " + timeForm(x0_temp))
                } else {
-                 d3.selectAll("#div_stat").html("&nbsp&nbsp&nbsp" +Math.round(deathtotal) + " daily cases on " +timeForm(x0_temp))
+                 d3.selectAll("#div_stat_0").html("&nbsp&nbsp&nbsp" +Math.round(deathtotal) + " daily cases on " +timeForm(x0_temp))
                }
+
+              county_data.slice(0,-1).forEach(function(d,i) {
+                  if (d3.select("#selector_2").attr("data-toggle")=="button") {
+                    d3.selectAll("#div_stat_"+(i+1)).html(Math.round(county_data[i].values[index][data_column_current]) + " cumulative cases")
+                  } else {
+                    d3.selectAll("#div_stat_"+(i+1)).html(Math.round(county_data[i].values[index][data_column_current]) + " daily cases")
+                  }
+              })
+   
 
             }
 
@@ -993,19 +1146,19 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           function GraphHover(county_data, data_column) {
           
             d3.selectAll(".serie_label")
-              .on('mouseover', function() {
+              .on("mouseover", function() {
                 if (d3.selectAll(".serie_labelactive").size()<2) {
                   d3.selectAll(".ghost-lineactive").attr("class", "ghost-line")
-                  d3.selectAll(".serie_labelactive").attr("class", "serie_label")
+                  d3.selectAll(".serie_labelactive").attr("class", "card-body serie_label")
                   d3.selectAll(".county-hover").attr("class", "county")
     
-                  selection = d3.select(this.parentNode).select(".ghost-line");
-                  legend    = d3.select(this).raise();      
+                  selection = d3.select(this.parentNode).select(".ghost-line")
+                  legend    = d3.select(this).raise()      
     
                   legend.transition()
                         .delay("0")
                         .duration("10")
-                        .attr("class","serie_labelactive serie_label")
+                        .attr("class","card-body serie_labelactive serie_label")
       
                   selection.transition()
                            .delay("0").duration("10")
@@ -1021,21 +1174,21 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
     
                   if (d3.selectAll(".serie_labelactive").size()>1) {
                       d3.selectAll(".ghost-lineactive").attr("class", "ghost-line")
-                      d3.selectAll(".serie_labelactive").attr("class", "serie_label")
+                      d3.selectAll(".serie_labelactive").attr("class", "card-body serie_label")
                       d3.selectAll(".county-hover").attr("class", "county")
                   } 
                 } else {
                   d3.selectAll(".ghost-lineactive").attr("class", "ghost-line")
-                  d3.selectAll(".serie_labelactive").attr("class", "serie_label")
+                  d3.selectAll(".serie_labelactive").attr("class", "card-body serie_label")
                   d3.selectAll(".county-hover").attr("class", "county")
     
                 }
               })
-              .on('mouseout', function() {
+              .on("mouseout", function() {
                 if (d3.selectAll(".serie_labelactive").size()>1) {
                   d3.selectAll(".ghost-lineactive").attr("class", "ghost-line")
                   d3.selectAll(".county-hover").attr("class", "county")
-                  d3.selectAll(".serie_labelactive").attr("class", "serie_label")
+                  d3.selectAll(".serie_labelactive").attr("class", "card-body serie_label")
                 } 
             })
           }
@@ -1092,7 +1245,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                 })
                 color_min = d3.min(rt_values)
                 color_max = d3.max(rt_values)
-                step.range([color_min, color_max]);
+                step.range([color_min, color_max])
                 color.domain([color_max, step(7), step(6), step(5), step(4), step(3), step(2),color_min])
 
                 /// County & state choice
@@ -1110,16 +1263,17 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                    .selectAll(null)
                    .data(county_data_current.slice(0,-1))
                    .enter()
-                   .append('svg')
-                   .attr('id',function(d,i) {
+                   .append("div")
+                   .attr("id","svg_graph_container_mini")  
+                   .attr("class","text-center")  
+                   .append("svg")
+                   .attr("id",function(d,i) {
                      return("svg_graph_"+(i+1))
                    })
-                   .attr("width", (width*2)/5 + adj *8)
-                   .attr("height", height_vis2/3 + adj*4)
-                   .attr("transform", function(d,i) {return("translate(" + ( 120+(((i/4-Math.floor(i/4))*4)+1))+ ",0)")})
-                   .style("padding", padding)
-                   .style("margin", margin)
-                   .classed("svg-content", true)    
+                   .attr("preserveAspectRatio", "xMinYMin meet")
+                   .attr("viewBox", "0 0 " + width_vis_mini + " " + height_vis_mini)
+                   .classed("svg-content", true)
+
 
                 // Redraw
                 DrawVisualization(county_data=county_data_current, map_data=map_data_current, 
@@ -1141,19 +1295,24 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
             
             // Initialize the data & update county_data
             county_data_master_temp = jQuery.extend(true, [], county_data_master)
-            console.log(relax_date)
             county_data_current     = ScaleData(county_data=county_data_master_temp, relax_date=relax_date)
 
             // Update axes
             graphsetup = InitializeGraph(county_data_current, data_column)
-            if (graphsetup.maxValue > yScale_main.domain()[1]) {
-              graphsetup.maxValue = graphsetup.maxValue
+            if (graphsetup.maxValue_main > yScale_main.domain()[1]) {
+              graphsetup.maxValue_main = graphsetup.maxValue_main
 
             } else {
 
-              graphsetup.maxValue = yScale_main.domain()[1]
+              graphsetup.maxValue_main = yScale_main.domain()[1]
             }
-            
+            if (graphsetup.maxValue_mini > yScale_mini.domain()[1]) {
+              graphsetup.maxValue_mini = graphsetup.maxValue_mini
+
+            } else {
+
+              graphsetup.maxValue_mini = yScale_mini.domain()[1]
+            }            
        
             // Helper function
             function UpdateVisualizationHelper(svg_id) {
@@ -1161,14 +1320,14 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
               // Initialize
               if (svg_id==-1) {
              
-                yScale_main.domain([graphsetup.minValue,graphsetup.maxValue])
+                yScale_main.domain([graphsetup.minValue,graphsetup.maxValue_main])
   
                 xScale_temp = xScale_main
                 yScale_temp = yScale_main
 
               } else {
                 
-                yScale_mini.domain([graphsetup.minValue,graphsetup.maxValue])
+                yScale_mini.domain([graphsetup.minValue,graphsetup.maxValue_mini])
   
                 xScale_temp = xScale_mini
                 yScale_temp = yScale_mini
@@ -1179,8 +1338,8 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
            
               // Update graph
               line = d3.line()
-                       .x(function(d) { return xScale_temp(d.date); })
-                       .y(function(d) { return yScale_temp(d[data_column]);});
+                       .x(function(d) { return xScale_temp(d.date) })
+                       .y(function(d) { return yScale_temp(d[data_column])})
             
               d3.selectAll("#svg_graph_"+(svg_id+1)).selectAll(".y").call(yaxis)
 
@@ -1195,34 +1354,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                 })         
                 .transition()
                 .duration(500)
-                .attr("d", function(d) { return line(d.values); });
-            
-              d3.selectAll("#svg_graph_"+(svg_id+1))
-                .selectAll(".serie_label") 
-                .data(function() {
-                  if (svg_id==-1) {
-                    return([county_data_current[county_data_current.length-1]])
-                  } else {
-                    return([county_data_current[svg_id]])
-                 } 
-                }) 
-                .datum(function(d) {
-                    return {
-                        id: d.key,
-                        maxDate: d3.max(d.values, function(f) {
-                          return f.date
-                        }),
-                        maxValue: d3.max(d.values, function(f) {
-                          return f[data_column]
-                        })
-                    }; 
-                  })
-                  .transition()
-                  .duration(500)
-                  .attr("transform", function(d) {
-                        return "translate(" + (xScale_temp(d.maxDate) + 10) + "," + (yScale_temp(d.maxValue) + 5 )+ ")"; 
-                  })
-                  .text(function(d) { return d.id; }); 
+                .attr("d", function(d) { return line(d.values) })
             
                d3.selectAll("#svg_graph_"+(svg_id+1))
                  .selectAll(".ghost-line")  
@@ -1235,7 +1367,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                   }) 
                  .transition()
                  .duration(500)
-                 .attr("d", function(d) { return line(d.values); });
+                 .attr("d", function(d) { return line(d.values) })
                 
             }
 
@@ -1268,46 +1400,48 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
 
           color_min = d3.min(rt_values)
           color_max = d3.max(rt_values)
-          step.range([color_min, color_max]);
+          step.range([color_min, color_max])
           color.domain([color_max, step(7), step(6), step(5), step(4), step(3), step(2),color_min])
 
           // Initialize the canvas
           svg_top = d3.select("body")
+                      .append("div")
+                      .attr("id","svg_top_container")
                       .append("svg")
-                      .attr("width", (width + adj *6)*2)
-                      .attr("height", 150)
-                      .attr("transform", "translate(" + ( 10)+ ",0)")
-                      .style("padding", padding)
-                      .style("margin", margin)
-                      .classed("svg-content", true);
+                      .attr("id","svg_top")
+                      .attr("preserveAspectRatio", "xMinYMin meet")
+                      .attr("viewBox", "0 0 " + width + " " + height_top)
+                      .classed("svg-content", true)
+                      .attr("transform", "translate(" + 0 + ","+padding_top+")")
           
           svg_map = d3.select("body")
+                      .append("div")
+                      .attr("id","svg_map_container")
+                      .attr("class","text-center")
                       .append("svg")
-                      .attr("width", width + adj *8)
-                      .attr("height", height_vis2 + adj*4)
-                      .attr("transform", "translate(" + ( 10)+ ",0)")
-                      .style("padding", padding)
-                      .style("margin", margin)
-                      .classed("svg-content", true);
-          
+                      .attr("id","svg_map")
+                      .attr("preserveAspectRatio", "xMinYMin meet")
+                      .attr("viewBox", "0 0 " + width_vis_main + " " + height_vis_main)
+                      .classed("svg-content", true)
+                      
           svg_graph_0 = d3.select("body")
+                          .append("div")
+                          .attr("id","svg_graph_container") 
+                          .attr("class","text-center")         
                           .append("svg")
                           .attr("id", "svg_graph_0")
-                          .attr("width", width + adj *8)
-                          .attr("height", height_vis2 + adj*4)
-                          .attr("transform", "translate(" + ( 10)+ ",0)")
-                          .style("padding", padding)
-                          .style("margin", margin)
-                          .classed("svg-content", true);
+                          .attr("preserveAspectRatio", "xMinYMin meet")
+                          .attr("viewBox", "0 0 " + width_vis_main + " " + height_vis_main)
+                          .classed("svg-content", true)
           
           svg_middle = d3.select("body")
+                         .append("div")
+                         .attr("id","svg_middle_container")
                          .append("svg")
-                         .attr("width", (width + adj *6)*2)
-                         .attr("height", 50)
-                         .attr("transform", "translate(" + ( 10)+ ",0)")
-                         .style("padding", padding)
-                         .style("margin", margin)
-                        .classed("svg-content", true);
+                         .attr("id","svg_middle")
+                         .attr("preserveAspectRatio", "xMinYMin meet")
+                         .attr("viewBox", "0 0 " + width + " " + height_middle)
+                         .classed("svg-content", true)
 
       
           svg_graph_mini = d3.select("body")
@@ -1317,25 +1451,26 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           svg_graph_mini.selectAll(null)
                         .data(county_data_current.slice(0,-1))
                         .enter()
-                        .append('svg')
-                        .attr('id',function(d,i) {
+                        .append("div")
+                        .attr("id","svg_graph_container_mini")  
+                        .attr("class","text-center")  
+                        .append("svg")
+                        .attr("id",function(d,i) {
                           return("svg_graph_"+(i+1))
                         })
-                        .attr("width", (width*2)/5 + adj *8)
-                        .attr("height", height_vis2/3 + adj*4)
-                        .attr("transform", function(d,i) { return("translate(" + (120+(((i/4-Math.floor(i/4))*4)+1))+ ",0)")})
-                        .style("padding", padding)
-                        .style("margin", margin)
+                        .attr("preserveAspectRatio", "xMinYMin meet")
+                        .attr("viewBox", "0 0 " + width_vis_mini + " " + height_vis_mini)
                         .classed("svg-content", true)
 
+
           svg_bottom = d3.select("body")
+                         .append("div")
+                         .attr("id","svg_bottom_container")
                          .append("svg")
-                         .attr("width", (width + adj *6)*2)
-                         .attr("height", 100)
-                         .attr("transform", "translate(" + ( 10)+ ","+(50)+")")
-                         .style("padding", padding)
-                         .style("margin", margin)
-                         .classed("svg-content", true);
+                         .attr("id","svg_bottom")
+                         .attr("preserveAspectRatio", "xMinYMin meet")
+                         .attr("viewBox", "0 0 " + width + " " + height_top)
+                         .classed("svg-content", true)
           
           // Draw 
           DrawVisualization(county_data=county_data_current, map_data=map_data_current, 

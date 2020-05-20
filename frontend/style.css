@@ -1,40 +1,107 @@
+/* GENERAL */
 body{
   font-family: Georgia;
   font-size: 10px
 }
 
-.btn-group-xs > .btn, .btn-xs {
-  padding: .25rem .4rem;
-  font-size: .1rem;
-  line-height: .75;
-  border-radius: .2rem;
-}
-
-.axis line{
-  stroke: #706f6f;
-  stroke-width: 1;
-  shape-rendering: optimizeSpeed;
-}
-
-path {
-    stroke-linejoin: round;
-    stroke-miterlimit: 2;
-    stroke-linecap: round;
-}
-
-.axis text {
-  fill: #2b2929;
-  font-family: Georgia;
-  font-size: 80%;
-}
 
 text {
-  fill: #2b2929;
   font-family: Georgia;
+  fill: #2b2929;
   font-size: 80%;
   font-weight: bold;
 }
 
+
+/* SVGs */
+#svg_top_container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  vertical-align: top;
+  overflow: hidden;
+
+}
+
+#svg_top {
+  padding-top:1%;
+}
+
+#svg_map_container {
+  display: inline-block;
+  position: relative;
+  width: 50%;
+  vertical-align: top;
+  overflow: hidden;
+  padding-left:4%;
+}
+
+#svg_graph_container {
+  display: inline-block;
+  position: relative;
+  width: 50%;
+  vertical-align: top;
+  overflow: hidden;
+  padding-right:4%;
+}
+
+#svg_graph_container_mini {
+  display: inline-block;
+  position: relative;
+  width: 25%;
+  vertical-align: top;
+  overflow: hidden;
+  margin-top:1%;
+}
+
+#svg_middle_container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  vertical-align: top;
+  overflow: hidden;
+
+}
+
+#svg_middle {
+  margin-top:2%;
+}
+
+#svg_bottom_container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  vertical-align: top;
+  overflow: hidden;
+
+}
+
+/* BUTTONS & CARDS */
+.btn-group-xs > .btn, .btn-xs {
+  padding: 6px 20px;
+  font-size: 10px;
+  line-height: .75;
+  border-radius: .2rem;
+}
+
+.card-body {
+  padding: 0.3rem;
+}
+
+/* LINES & LABELS */
+
+/* Mini Labels */
+.serie_label {
+  color: : #2b2929;
+  font-weight: normal;
+}
+
+.serie_labelactive {
+  color: #0e5096;
+  font-weight: bold;
+}
+
+/* Lines  */
 .line {
   fill: none;
   stroke-width: 0.6;
@@ -44,8 +111,8 @@ text {
 .ghost-line {
   fill:none;
   stroke: darkgrey;
-    opacity: 0;
-stroke-width: 5;
+  opacity: 0;
+  stroke-width: 5;
 }
 
 .ghost-lineactive {
@@ -54,38 +121,20 @@ stroke-width: 5;
   opacity: 1;
   stroke-width: 2;
 }
-	                 
-.serie_label {
-  fill: #0b0a0a;
-  opacity: 0.5;
-  font-family: Georgia;
-  font-size: 80%;
-}
+   
 
-.serie_labelactive {
-  fill: #2b2929;
-  opacity: 1;
-  font-family: Georgia;
-  font-size: 80%;
-}
+/* MAP */
 
-.brush {
-  stroke: #ffc107;
-  stroke-opacity:0.5;
-}
-
-.focus  {
-  opacity:0.2;
+path {
+    stroke-linejoin: round;
+    stroke-miterlimit: 2;
+    stroke-linecap: round;
 }
 
 .outline {
   fill: none;
   stroke: #000;
   stroke-width: 1.5px;
-}
-
-.card-body {
-  padding: 0.3rem;
 }
 
 .feature {
@@ -103,12 +152,27 @@ path {
   stroke: #fff;
   stroke-width: .5px;
 }
-.county-hover{
+
+.county-hover {
   fill:#0e5096;
 }
 
-.county-hover-fixed{
+.county-hover-fixed {
   fill:#0e5096;
+}
+
+/* GRAPH */
+
+.axis line {
+  stroke: #706f6f;
+  stroke-width: 1;
+  shape-rendering: optimizeSpeed;
+}
+
+.axis text {
+  font-family: Georgia;
+  fill: #2b2929;
+  font-size: 80%;
 }
 
 .axis path {
@@ -117,3 +181,20 @@ path {
   shape-rendering: optimizeSpeed;
   fill: none;
 }
+
+.brush {
+  stroke: #ffc107;
+  stroke-opacity:0.5;
+}
+
+.focus  {
+  opacity:0.2;
+}
+
+
+
+
+
+
+
+
