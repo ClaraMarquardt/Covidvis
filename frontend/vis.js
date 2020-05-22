@@ -962,7 +962,6 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                                         }
                                       })
                                       .attr("id","brush_"+svg_id)
-                                      .attr("stroke-width", "5")
                                       .attr("stroke", "black")
                                       .attr("y1", height_focus_temp)
                                       .attr("y2", height_temp)

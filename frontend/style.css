@@ -105,6 +105,13 @@ text {
   border-radius: .2rem;
 }
 
+.brush {
+    stroke: #ffc107;
+    stroke-opacity:0.5;
+    stroke-width: 5;
+}
+
+
 /* Small */
 @media only screen and (max-width: 800px) {
 
@@ -191,6 +198,12 @@ text {
     font-size: 10px;
     line-height: .75;
     border-radius: .2rem;
+  }
+
+  .brush {
+    stroke: #ffc107;
+    stroke-opacity:0.5;
+    stroke-width: 10;
   }
 
   
@@ -297,10 +310,7 @@ path {
   fill: none;
 }
 
-.brush {
-  stroke: #ffc107;
-  stroke-opacity:0.5;
-}
+
 
 .focus  {
   opacity:0.2;
