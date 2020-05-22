@@ -53,10 +53,6 @@ def index_view():
 	# Subset data
 	county_data_subset = dp.process_county_data(county_data=county_data, state=flask.request.args.get('state'))
 	
-	# Inspect the data
-	print(county_data_subset.columns)
-	print(county_data_subset[1:10].to_json)
-
 	# Render home page
 	return flask.render_template('index.html')
 
@@ -67,10 +63,6 @@ def load_county_data_crosswalk_view():
 
 	# Subset data
 	county_data_crosswalk_subset = dp.process_county_data_crosswalk(county_data=county_data)
-	
-	# Inspect the data
-	print(county_data_crosswalk_subset.columns)
-	print(county_data_crosswalk_subset[1:10])
 
 	# Render home page
 	return county_data_crosswalk_subset.to_csv()
@@ -87,10 +79,6 @@ def load_county_data_view():
 	# Subset data
 	county_data_subset = dp.process_county_data(county_data=county_data, state=flask.request.args.get('state'))
 	
-	# Inspect the data
-	print(county_data_subset.columns)
-	print(county_data_subset[1:10])
-
 	# Render home page
 	return county_data_subset.to_csv()
 
@@ -105,10 +93,6 @@ def load_map_data_view():
 	# Subset data
 	map_data_subset = dp.process_map_data(map_data=map_data, state=flask.request.args.get('state'))
 	
-	# Inspect the data
-	print(map_data_subset.columns)
-	print(map_data_subset[1:10])
-
 	# Render home page
 	return map_data_subset.to_json()
 

@@ -216,7 +216,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
 
         // Load the visualization data
         county_data_link = d3.csv("/load_county_data?state="+state_choice)
-        map_data_link    = d3.json("/frontend/data/map/us.json")
+        map_data_link    = d3.json("/frontend/data/map/us_"+state_choice+".json")
 
         county_data_link.then(function(county_data_raw) {
           map_data_link.then(function(map_data_raw) {
@@ -329,7 +329,6 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                    .append("text")
                    .attr("transform", "translate(" + (width/2) + "," + (height_top/3) +")")
                    .text("Model Projections")
-                   .style("font-size", "20px")
                    .style("text-anchor", "middle")
                    .style("dominant-baseline", "central")
 
@@ -339,7 +338,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                     .attr("transform", "translate(" + ((width-(button_width_main*states(county_data_crosswalk_current).length))/2 + i*button_width_main)+ "," + ((height_top/3)*2) +")")
                     .append("foreignObject")
                     .attr("width",button_width_main)
-                    .attr("height",button_height_main)
+                    .attr("height",button_height_main*2)
                     .append("xhtml:div")
                     .attr("class","text-center")
                     .on("click", function() {
@@ -352,7 +351,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                     .append("g")
                     .append("xhtml:button")
                     .attr("id","button_"+(i))
-                    .attr("class","btn btn-outline-dark btn-xs statebutton")
+                    .attr("class","btn btn-outline-dark btn-xss statebutton")
                     .html(d)
 
             })
@@ -372,8 +371,8 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           function DrawMap(map_data, county_data, state_choice, state_choice_id, county_choice, county_choice_id) {
           
             // Intialize map objects
-            states_data = topojson.feature(map_data, map_data.objects.states),
-            state       = states_data.features.filter(function(d) { return d.id === state_choice_id })[0]
+            states_data = topojson.feature(map_data, map_data.objects.states)
+            state       = states_data.features.filter(function(d) { return d })[0]
            
             projection = d3.geoAlbers()
             projection.scale(1).translate([0, 0])
@@ -393,24 +392,6 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                    .style("font-size", "15px")
                    .style("text-anchor", "middle")
                    .style("dominant-baseline", "central")
-    
-            // Generate canvas objects
-            svg_map.append("path")
-                   .datum(topojson.mesh(map_data, map_data.objects.states, function(a, b) { return a !== b }))
-                   .attr("class", "mesh")
-                   .attr("d", path)
-          
-            svg_map.append("path")
-                   .datum(state)
-                   .attr("class", "outline")
-                   .attr("d", path)
-                   .attr("id", "land")
-          
-            svg_map.append("clipPath")
-                   .attr("id", "clip-land")
-                   .append("use")
-                   .attr("xlink:href", "#land")
-          
             svg_map.selectAll("path")
                     .data(topojson.feature(map_data, map_data.objects.counties).features)
                     .enter()
@@ -435,7 +416,6 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                     .attr("county-id", function(d) {
                       return d.id
                     })
-                    .attr("clip-path", "url(#clip-land)")
                     .on("mouseover", function(d) {
                       
                       d3.selectAll(".county-hover").attr("class", "county")
@@ -494,7 +474,12 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           
                     })
                   })
-          
+                svg_map.append("path")
+                   .datum(states_data)
+                   .attr("class", "outline")
+                   .attr("d", path)
+                   .attr("id", "land")
+      
             // Link counties to rt & colour based on Rt
             d3.selectAll(".county").each(function(d,i) {
               county = d3.select(this).attr("county-name")
@@ -1015,7 +1000,6 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                       .append("text")
                       .attr("transform", "translate(" + (width/2)+ ","+((height_middle/3)*2)+")")
                       .text("Results are up-to-date as of " + timeForm(timeConv(today)))
-                      .style("font-size", "10px")
                       .style("font-style","italic")
                       .style("font-weight",100)
                       .style("text-anchor", "middle")
@@ -1025,7 +1009,6 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
                       .append("text")
                       .attr("transform", "translate(" + (width/2)+ ","+((height_middle/3)*3)+")")
                       .text("(Your location: " + address + ")")
-                      .style("font-size", "10px")
                       .style("font-style","italic")
                       .style("font-weight",100)
                       .style("text-anchor", "middle")
@@ -1223,7 +1206,7 @@ $.getJSON("http://ip-api.com/json", function (longlatdata, status) {
           function UpdateData(state) {
           
             county_data_link = d3.csv("/load_county_data?state="+state)
-            map_data_link    = d3.json("/frontend/data/map/us.json")
+            map_data_link    = d3.json("/frontend/data/map/us_"+state+".json")
 
             county_data_link.then(function(county_data_raw) {
               map_data_link.then(function(map_data_raw) {
